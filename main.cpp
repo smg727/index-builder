@@ -6,5 +6,6 @@ using namespace std;
 int main() {
     std::cout << "Hello, World!" << std::endl;
     generatePostings();
+    // tupleTest();
     return 0;
 }

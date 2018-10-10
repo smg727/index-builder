@@ -9,7 +9,7 @@ using  namespace std;
 
 int generatePostings();
 vector<string> fetchWetFilePaths();
-int generateFilePosting(string);
-
+int generateFilePosting(string, unordered_map<int,string> &urlMap);
+void tupleTest();
 #endif //INDEX_BUILDER_UTILS_H
 

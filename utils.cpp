@@ -9,6 +9,7 @@
 #include <fstream>
 #include <unordered_map>
 #include <string>
+#include <sstream>
 
 using namespace std;
 
@@ -35,11 +36,12 @@ bool compareTuple(Tuple a, Tuple b){
 
 int generatePostings() {
 
+    unordered_map<int,string> urlMap;
     vector<string> wetfilePaths = fetchWetFilePaths();
     string target = "WARC-Target-URI:";
     unordered_map<int, string> urlTable;
     auto file = wetfilePaths.begin();
-    int result = generateFilePosting(*file);
+    int result = generateFilePosting(*file, urlMap);
 
 
 
@@ -64,12 +66,13 @@ vector<string> fetchWetFilePaths() {
 
 
 // generates posting for a particular wet file
-int generateFilePosting(string filePath){
+int generateFilePosting(string filePath, unordered_map<int,string> &urlMap){
     string target = "WARC-Target-URI:";
     int bufferLength = 9000;
     ifstream in;
     in.open(filePath);
     char *buffer = new char[bufferLength];
+    vector<Tuple> postings;
 
     cout << "reading "+filePath;
     // jump to first url
@@ -97,14 +100,19 @@ int generateFilePosting(string filePath){
 
             in.read(buffer,bufferLength);
             haystack = string(buffer);
-            urlEnd = haystack.find('\r',urlStart);
+            urlEnd = haystack.find('\r',0);
             url.append(haystack.substr(0,urlEnd));
         }
 
-        cout << "\n\n";
-        cout<< url << endl;
+        int docID = urlMap.size();
+        urlMap.insert(pair<int,string>(docID,url));
 
-
+        urlEnd = haystack.find("\r\n\r\n",urlEnd);
+        while(!in.eof() && urlEnd == string::npos){
+            in.read(buffer,bufferLength);
+            haystack = string(buffer);
+            urlEnd = haystack.find("\r\n\r\n",urlStart);
+        }
 
 
         contentEnd = haystack.find("\n\r\n\r\n",urlEnd);
@@ -112,50 +120,49 @@ int generateFilePosting(string filePath){
         while(!in.eof() && contentEnd == string::npos){
             in.read(buffer,bufferLength);
             haystack = string(buffer);
-            contentEnd = haystack.find("\r\n\r\n",urlEnd);
+            contentEnd = haystack.find("\n\r\n\r\n",0);
             content.append(haystack.substr(0,contentEnd));
         }
-        cout << "content found:";
-        cout << content.substr(content.length()-50) << endl;
+        replace_if(content.begin() , content.end() ,
+                   [] (const char& c) { return (ispunct(c)) ;},' ');
+
+        stringstream contentStream(content); // Turn the string into a stream.
+        string tok;
+
+        while(getline(contentStream, tok, ' ')) {
+            postings.push_back(Tuple(tok, docID));
+        }
 
         urlStart = contentEnd;
     }
 
-
-
-
-
-
-
-
-
-//    while(!in.eof()){
-//        in.read(buffer,bufferLength);
-//        string haystack(buffer);
-//        // find start of first url
-//        size_t pos = haystack.find(target);
-//
-//        while(pos!=string::npos){
-//            cout << "\nfound at";
-//            size_t uriEnd = haystack.find('\r',pos);
-//            cout << uriEnd << endl;
-//            if(pos+18>bufferLength || uriEnd == string::npos){
-//                // next url
-//                pos = haystack.find(target,pos+1);
-//                continue;
-//            }
-//            string url =  haystack.substr(pos+17,(uriEnd-1)-(pos+16));
-//            cout << url << endl;
-//            docID = urlTable.size();
-//            urlTable[docID] = url;
-//            while (){
-//
-//            }
-//            pos = haystack.find(target,pos+1);
-//        }
-//
-//    }
+    cout << " sorting " << endl;
+    sort(postings.begin(),postings.end(),compareTuple);
+    cout << "sort complete" << endl;
+    for(auto i=postings.begin();i!=postings.end();++i){
+        cout << i->word << " , " << i->docID << endl;
+    }
 
     in.close();
     return 0;
+}
+
+// unit test to see if tuple sort is working fine
+void tupleTest(){
+
+    vector<Tuple> vc;
+    vc.push_back(Tuple("z",10));
+    vc.push_back(Tuple("za",20));
+    vc.push_back(Tuple("za",10));
+    vc.push_back(Tuple("s",10));
+    vc.push_back(Tuple("a",10));
+    vc.push_back(Tuple("ch",30));
+    vc.push_back(Tuple("b",40));
+    vc.push_back(Tuple("b",10));
+    sort(vc.begin(),vc.end(),compareTuple);
+    for(auto i = vc.begin();i!=vc.end();++i){
+        cout << i->word << " , " << i->docID << endl;
+    }
+    return;
+
 }
