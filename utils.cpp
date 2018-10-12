@@ -1,6 +1,7 @@
 //
 // Created by Sangram Ghuge on 10/7/18.
-//
+// This file contians all the functions required to do the following transformation
+// convert n wet files --> n posting files
 #include <sys/types.h>
 #include <dirent.h>
 #include "utils.h"
@@ -40,12 +41,20 @@ int generatePostings() {
     vector<string> wetfilePaths = fetchWetFilePaths();
     string target = "WARC-Target-URI:";
     unordered_map<int, string> urlTable;
+
+//    for(auto file = wetfilePaths.begin();file!=wetfilePaths.end();++file){
+//        cout << "generating posting for " << *file << endl;
+//        generateFilePosting(*file, urlMap);
+//        cout << "complete, current total url's= " << urlTable.size() << endl << endl;
+//    }
+
+    // used while testing to generate 2 posting files
     auto file = wetfilePaths.begin();
+    ++file;
     int result = generateFilePosting(*file, urlMap);
-
-
-
-    return  result;
+//    ++file;
+//    result = generateFilePosting(*file, urlMap);
+    return 0;
 }
 
 // lists out all wet files paths
@@ -57,7 +66,7 @@ vector<string> fetchWetFilePaths() {
     while ((dp = readdir(dirp)) != NULL) {
         string fileName(dp->d_name);
         if(fileName.find("warc.wet") != string::npos){
-            fileNames.push_back("../wet_files/"+fileName);
+            fileNames.push_back(fileName);
         }
     }
     closedir(dirp);
@@ -66,15 +75,17 @@ vector<string> fetchWetFilePaths() {
 
 
 // generates posting for a particular wet file
-int generateFilePosting(string filePath, unordered_map<int,string> &urlMap){
+int generateFilePosting(string fileName, unordered_map<int,string> &urlMap){
     string target = "WARC-Target-URI:";
     int bufferLength = 9000;
+    string filePath = "../wet_files/"+fileName;
     ifstream in;
     in.open(filePath);
     char *buffer = new char[bufferLength];
     vector<Tuple> postings;
+    ofstream outfile("../posting_files/postings_"+fileName);
 
-    cout << "reading "+filePath;
+    cout << "reading "+filePath << endl;
     // jump to first url
     in.read(buffer,bufferLength);
     string haystack(buffer);
@@ -124,25 +135,27 @@ int generateFilePosting(string filePath, unordered_map<int,string> &urlMap){
             content.append(haystack.substr(0,contentEnd));
         }
         replace_if(content.begin() , content.end() ,
-                   [] (const char& c) { return (ispunct(c)) ;},' ');
+                   [] (const char& c) { return (ispunct(c) || !(isalpha(c) || isdigit(c))) ;},' ');
 
         stringstream contentStream(content); // Turn the string into a stream.
         string tok;
 
         while(getline(contentStream, tok, ' ')) {
+            if(tok.length()==0)
+                continue;
             postings.push_back(Tuple(tok, docID));
         }
 
         urlStart = contentEnd;
     }
 
-    cout << " sorting " << endl;
+    cout << "sorting postings for "<< fileName << endl;
     sort(postings.begin(),postings.end(),compareTuple);
-    cout << "sort complete" << endl;
+    cout << "sort complete, writing to disk" << endl;
     for(auto i=postings.begin();i!=postings.end();++i){
-        cout << i->word << " , " << i->docID << endl;
+        outfile <<i->word<< ","<<i->docID<<endl;
     }
-
+    outfile.close();
     in.close();
     return 0;
 }
@@ -150,18 +163,19 @@ int generateFilePosting(string filePath, unordered_map<int,string> &urlMap){
 // unit test to see if tuple sort is working fine
 void tupleTest(){
 
-    vector<Tuple> vc;
-    vc.push_back(Tuple("z",10));
-    vc.push_back(Tuple("za",20));
-    vc.push_back(Tuple("za",10));
-    vc.push_back(Tuple("s",10));
-    vc.push_back(Tuple("a",10));
-    vc.push_back(Tuple("ch",30));
-    vc.push_back(Tuple("b",40));
-    vc.push_back(Tuple("b",10));
-    sort(vc.begin(),vc.end(),compareTuple);
-    for(auto i = vc.begin();i!=vc.end();++i){
-        cout << i->word << " , " << i->docID << endl;
+    vector<string> postings;
+    string content = "                      ";
+    stringstream contentStream(content); // Turn the string into a stream.
+    string tok;
+
+    while(getline(contentStream, tok, ' ')) {
+        if(tok.length()==0)
+            continue;
+        postings.push_back(tok);
+    }
+
+    for(auto i=postings.begin();i!=postings.end();++i){
+        cout << *i << endl;
     }
     return;
 
