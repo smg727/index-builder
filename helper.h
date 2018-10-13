@@ -6,5 +6,4 @@
 #define INDEX_BUILDER_HELPER_H
 
 #endif //INDEX_BUILDER_HELPER_H
-
 int createInvertedIndex();

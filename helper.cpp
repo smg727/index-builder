@@ -11,6 +11,17 @@
 
 using namespace std;
 
+struct wordPair{
+public:
+    string docID;
+    string freq;
+
+    wordPair(string docID, int freq){
+        this->docID = docID;
+        this->freq = to_string(freq);
+    }
+};
+
 int createInvertedIndex(){
 
     string fileName = "sorted_posting";
@@ -23,45 +34,36 @@ int createInvertedIndex(){
     ofstream out;
     out.open(indexPath+indexName);
     char *buffer = new char[bufferLength];
-    vector<string> docIDs;
+    vector<wordPair> document;
     string prevWord = "0";
     string prevDoc = "0";
+    string tok;
+    string word;
+    string docID;
+    int freq = 1;
+    while(in >> word  >> docID){
 
-    while(!in.eof()){
-
-        in.read(buffer,bufferLength);
-        stringstream lineStream;
-        lineStream << buffer;
-        string tok;
-
-        int freq = 0;
-        while(getline(lineStream, tok, '\n') && !lineStream.eof()) {
-
-            size_t commaIndex = tok.find(',', 0);
-            if(commaIndex==string::npos)
-                continue;
-            string word = tok.substr(0, commaIndex);
-            string docID = tok.substr(commaIndex + 1, tok.length());
-
-            if (word == prevWord) {
-                if (docIDs.size()==0 || docID != docIDs.back()) {
-                    docIDs.push_back(docID);
-                }
-                prevWord = word;
-                continue;
+        if (word == prevWord) {
+            if (document.size()==0 || docID != document.back().docID) {
+                document.push_back(wordPair(docID,freq));
+                freq = 1;
+            } else {
+                freq++;
             }
-            out << word << " different from " << prevWord;
-            out << prevWord << " ";
-            for (auto i = docIDs.begin(); i != docIDs.end(); ++i) {
-                out << *i << ",";
-            }
-            out << "\n";
             prevWord = word;
-            docIDs.clear();
-            docIDs.push_back(docID);
+            continue;
         }
-
+        //out << word << " different from " << prevWord;
+        out << prevWord << " ";
+        for (auto i = document.begin(); i != document.end(); ++i) {
+            out << ":" << i->docID << "," << i->freq;
+        }
+        out << ":\n";
+        prevWord = word;
+        document.clear();
+        document.push_back(wordPair(docID,1));
     }
+
     in.close();
     out.close();
     return 0;

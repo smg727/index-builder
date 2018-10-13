@@ -35,9 +35,8 @@ bool compareTuple(Tuple a, Tuple b){
 }
 
 
-int generatePostings() {
+int generatePostings(unordered_map<int,string> &urlMap) {
 
-    unordered_map<int,string> urlMap;
     vector<string> wetfilePaths = fetchWetFilePaths();
     string target = "WARC-Target-URI:";
     unordered_map<int, string> urlTable;
@@ -48,7 +47,7 @@ int generatePostings() {
 //        cout << "complete, current total url's= " << urlTable.size() << endl << endl;
 //    }
 
-    // used while testing to generate 2 posting files
+     // used while testing to generate 2 posting files
     auto file = wetfilePaths.begin();
     ++file;
     int result = generateFilePosting(*file, urlMap);
@@ -153,30 +152,41 @@ int generateFilePosting(string fileName, unordered_map<int,string> &urlMap){
     sort(postings.begin(),postings.end(),compareTuple);
     cout << "sort complete, writing to disk" << endl;
     for(auto i=postings.begin();i!=postings.end();++i){
-        outfile <<i->word<< ","<<i->docID<<endl;
+        outfile <<i->word<< " "<<i->docID<<endl;
     }
     outfile.close();
     in.close();
     return 0;
 }
 
-// unit test to see if tuple sort is working fine
-void tupleTest(){
+int writeUrlMapToDisk(unordered_map <int,string> &urlMap){
+    string serializedMap = "UrlMap";
+    string path = "../inverted_index/";
+    ofstream out;
+    out.open(path+serializedMap);
 
-    vector<string> postings;
-    string content = "                      ";
-    stringstream contentStream(content); // Turn the string into a stream.
-    string tok;
-
-    while(getline(contentStream, tok, ' ')) {
-        if(tok.length()==0)
-            continue;
-        postings.push_back(tok);
+    for(auto i=urlMap.begin();i!=urlMap.end();++i){
+        out<<i->first<<" "<<i->second<<endl;
     }
-
-    for(auto i=postings.begin();i!=postings.end();++i){
-        cout << *i << endl;
-    }
-    return;
-
+    out.close();
+    return 0;
 }
+
+unordered_map <int,string> loadUrlMapFromDisk(){
+    string serializedMap = "UrlMap_old";
+    string path = "../inverted_index/";
+    unordered_map<int,string> urlMap;
+    ifstream in;
+    string docID;
+    string url;
+    in.open(path+serializedMap);
+    while(in >> docID  >> url){
+        cout << docID << " " << url;
+
+    }
+    return urlMap;
+}
+
+
+
+
