@@ -35,22 +35,23 @@ bool compareTuple(Tuple a, Tuple b){
 }
 
 
-int generatePostings(unordered_map<int,string> &urlMap) {
+int generatePostings(unordered_map<string,string> &urlMap) {
 
     vector<string> wetfilePaths = fetchWetFilePaths();
     string target = "WARC-Target-URI:";
-    unordered_map<int, string> urlTable;
 
-//    for(auto file = wetfilePaths.begin();file!=wetfilePaths.end();++file){
-//        cout << "generating posting for " << *file << endl;
-//        generateFilePosting(*file, urlMap);
-//        cout << "complete, current total url's= " << urlTable.size() << endl << endl;
-//    }
+    for(auto file = wetfilePaths.begin();file!=wetfilePaths.end();++file){
+        cout << "generating posting for " << *file << endl;
+        generateFilePosting(*file, urlMap);
+        cout << "complete, current total url's= " << urlMap.size() << endl << endl;
+    }
 
-     // used while testing to generate 2 posting files
-    auto file = wetfilePaths.begin();
-    ++file;
-    int result = generateFilePosting(*file, urlMap);
+//     // used while testing to generate 2 posting files
+//    auto file = wetfilePaths.begin();
+//    ++file;
+//    int result = generateFilePosting(*file, urlMap);
+//    ++file;
+//    result = generateFilePosting(*file, urlMap);
 //    ++file;
 //    result = generateFilePosting(*file, urlMap);
     return 0;
@@ -74,7 +75,7 @@ vector<string> fetchWetFilePaths() {
 
 
 // generates posting for a particular wet file
-int generateFilePosting(string fileName, unordered_map<int,string> &urlMap){
+int generateFilePosting(string fileName, unordered_map<string,string> &urlMap){
     string target = "WARC-Target-URI:";
     int bufferLength = 9000;
     string filePath = "../wet_files/"+fileName;
@@ -114,8 +115,8 @@ int generateFilePosting(string fileName, unordered_map<int,string> &urlMap){
             url.append(haystack.substr(0,urlEnd));
         }
 
-        int docID = urlMap.size();
-        urlMap.insert(pair<int,string>(docID,url));
+        size_t docID = urlMap.size();
+        urlMap.insert(pair<string,string>(to_string(docID),url));
 
         urlEnd = haystack.find("\r\n\r\n",urlEnd);
         while(!in.eof() && urlEnd == string::npos){
@@ -159,7 +160,7 @@ int generateFilePosting(string fileName, unordered_map<int,string> &urlMap){
     return 0;
 }
 
-int writeUrlMapToDisk(unordered_map <int,string> &urlMap){
+int writeUrlMapToDisk(unordered_map <string,string> &urlMap){
     string serializedMap = "UrlMap";
     string path = "../inverted_index/";
     ofstream out;
@@ -172,19 +173,17 @@ int writeUrlMapToDisk(unordered_map <int,string> &urlMap){
     return 0;
 }
 
-unordered_map <int,string> loadUrlMapFromDisk(){
-    string serializedMap = "UrlMap_old";
+int loadUrlMapFromDisk(unordered_map <string,string> &urlMap){
+    string serializedMap = "UrlMap";
     string path = "../inverted_index/";
-    unordered_map<int,string> urlMap;
     ifstream in;
     string docID;
     string url;
     in.open(path+serializedMap);
     while(in >> docID  >> url){
-        cout << docID << " " << url;
-
+        urlMap.insert(pair<string,string>(docID,url));
     }
-    return urlMap;
+    return 0;
 }
 
 

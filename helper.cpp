@@ -13,27 +13,32 @@ using namespace std;
 
 struct wordPair{
 public:
-    string docID;
-    string freq;
+    int docID;
+    int freq;
 
     wordPair(string docID, int freq){
-        this->docID = docID;
-        this->freq = to_string(freq);
+        this->docID = stoi(docID);
+        this->freq = freq;
     }
 };
 
-int createInvertedIndex(){
 
+int createInvertedIndex(unordered_map<string,lexiconData> &lexicon){
+    bool writeBinary = true;
+    // sorted postings to read from
     string fileName = "sorted_posting";
-    int bufferLength = 9000;
     string filePath = "../unix_sorted_postings/"+fileName;
+    // index
     string indexName = "index";
     string indexPath = "../inverted_index/";
+    string index_frequency = "index_frequency";
+
     ifstream in;
     in.open(filePath);
     ofstream out;
-    out.open(indexPath+indexName);
-    char *buffer = new char[bufferLength];
+    out.open(indexPath+indexName,  ios::binary | ios::out);
+    ofstream outFrequency;
+    outFrequency.open(indexPath+index_frequency,  ios::binary | ios::out);
     vector<wordPair> document;
     string prevWord = "0";
     string prevDoc = "0";
@@ -44,7 +49,7 @@ int createInvertedIndex(){
     while(in >> word  >> docID){
 
         if (word == prevWord) {
-            if (document.size()==0 || docID != document.back().docID) {
+            if (document.empty() || stoi(docID) != document.back().docID) {
                 document.push_back(wordPair(docID,freq));
                 freq = 1;
             } else {
@@ -53,12 +58,18 @@ int createInvertedIndex(){
             prevWord = word;
             continue;
         }
-        //out << word << " different from " << prevWord;
-        out << prevWord << " ";
+        int wordStartPosition = out.tellp();
+        int freqStartPosition = outFrequency.tellp();
+        //out << prevWord << " ";
         for (auto i = document.begin(); i != document.end(); ++i) {
-            out << ":" << i->docID << "," << i->freq;
+            out.write((char *)&i->docID, sizeof(int));
+            outFrequency.write((char *)&i->freq, sizeof(int));
         }
-        out << ":\n";
+        int wordEndPosition = out.tellp();
+        int freqEndPosition = outFrequency.tellp();
+        lexicon.insert(pair<string,lexiconData>(prevWord,lexiconData(wordStartPosition,
+                wordEndPosition,freqStartPosition,freqEndPosition)));
+//        out << ":\n";
         prevWord = word;
         document.clear();
         document.push_back(wordPair(docID,1));
@@ -67,4 +78,19 @@ int createInvertedIndex(){
     in.close();
     out.close();
     return 0;
+}
+
+int writeLexiconToDisk(unordered_map<string,lexiconData> &lexicon){
+    string serializedLexicon = "Lexicon";
+    string path = "../inverted_index/";
+    ofstream out;
+    out.open(path+serializedLexicon);
+
+    for(auto i=lexicon.begin();i!=lexicon.end();++i){
+        out<<i->first<<" "<<i->second.wordStartOffset<<" "<<i->second.wordEndOffset<<" "
+        <<i->second.frequencyStartOffset<<" "<<i->second.frequencyEndOffset<<endl;
+    }
+    out.close();
+    return 0;
+
 }
