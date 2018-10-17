@@ -2,7 +2,7 @@
 #include "utils.h"
 #include "helper.h"
 #include <fstream>
-
+#include <cstdlib>
 int main() {
     cout << "Warning: Huge program starting" << std::endl;
 
@@ -20,10 +20,13 @@ int main() {
 
 
     // create one large posting file using unix sort
+    string command = "sort --merge -k1,1 -k2n,2 ../posting_files/postings_00011.warc.wet ../posting_files/postings_00049.warc.wet -o ../unix_sorted_postings/sorted_posting";
+    result = system(command.c_str());
+    cout << result;
 
     // transform one large posting file to an inverted index
-    createInvertedIndex(lexicon);
-    result = writeLexiconToDisk(lexicon);
+    //createInvertedIndex(lexicon);
+    //result = writeLexiconToDisk(lexicon);
 
 
     // TODO: test
