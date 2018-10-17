@@ -3,30 +3,53 @@
 #include "helper.h"
 #include <fstream>
 #include <cstdlib>
+#include "flags.h"
+
+int bufferLength;
+string wetFilesPath;
+string persistedURLMap;
+string mergeCommand;
+bool writeBinary;
+string mergedPostings;
+string indexFile;
+string indexFrequencyFile;
+string persistedLexicon;
+
 int main() {
     cout << "Warning: Huge program starting" << std::endl;
 
+    writeBinary = true;
+    bufferLength = 9000;
+    wetFilesPath = "../wet_files";
+    persistedURLMap = "../inverted_index/UrlMap";
+    mergeCommand = "sort --merge -k1,1 -k2n,2 ../posting_files/postings* -o ../unix_sorted_postings/sorted_posting";
+    mergedPostings = "../unix_sorted_postings/sorted_posting";
+    indexFile = "../inverted_index/index";
+    indexFrequencyFile = "../inverted_index/index_frequency";
+    persistedLexicon = "../inverted_index/Lexicon";
 
 
     unordered_map<string,string> urlMap;
     unordered_map<string,lexiconData> lexicon;
 
-
-    //generatePostings(urlMap);
     int result;
-    //result = writeUrlMapToDisk(urlMap);
-    //result  = loadUrlMapFromDisk(urlMap);
+//    result = generatePostings(urlMap);
+//    assert(result==0);
 
+//    result = writeUrlMapToDisk(urlMap);
+//    assert(result==0);
 
+//    result  = loadUrlMapFromDisk(urlMap);
+//    assert(result==0);
+//
+//    result = system(mergeCommand.c_str());
+//    assert(result==0);
 
-    // create one large posting file using unix sort
-    string command = "sort --merge -k1,1 -k2n,2 ../posting_files/postings_00011.warc.wet ../posting_files/postings_00049.warc.wet -o ../unix_sorted_postings/sorted_posting";
-    result = system(command.c_str());
-    cout << result;
+    result = createInvertedIndex(lexicon);
+    assert(result==0);
 
-    // transform one large posting file to an inverted index
-    //createInvertedIndex(lexicon);
-    //result = writeLexiconToDisk(lexicon);
+    result = writeLexiconToDisk(lexicon);
+    assert(result==0);
 
 
     // TODO: test

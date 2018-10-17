@@ -8,6 +8,7 @@
 #include <fstream>
 #include <vector>
 #include <sstream>
+#include "flags.h"
 
 using namespace std;
 
@@ -24,25 +25,17 @@ public:
 
 
 int createInvertedIndex(unordered_map<string,lexiconData> &lexicon){
-    bool writeBinary = false;
-    // sorted postings to read from
-    string fileName = "sorted_posting";
-    string filePath = "../unix_sorted_postings/"+fileName;
-    // index
-    string indexName = "index";
-    string indexPath = "../inverted_index/";
-    string index_frequency = "index_frequency";
+
     ifstream in;
-    in.open(filePath);
+    in.open(mergedPostings);
     ofstream out;
     ofstream outFrequency;
-
     if(writeBinary){
-        out.open(indexPath+indexName,  ios::binary | ios::out);
-        outFrequency.open(indexPath+index_frequency,  ios::binary | ios::out);
+        out.open(indexFile,  ios::binary | ios::out);
+        outFrequency.open(indexFrequencyFile,  ios::binary | ios::out);
     } else {
-        out.open(indexPath+indexName);
-        outFrequency.open(indexPath+index_frequency);
+        out.open(indexFile);
+        outFrequency.open(indexFrequencyFile);
     }
     vector<wordPair> document;
     string prevWord = "0";
@@ -51,6 +44,7 @@ int createInvertedIndex(unordered_map<string,lexiconData> &lexicon){
     string word;
     string docID;
     int freq = 1;
+
     while(in >> word  >> docID){
 
         if (word == prevWord) {
@@ -97,10 +91,9 @@ int createInvertedIndex(unordered_map<string,lexiconData> &lexicon){
 }
 
 int writeLexiconToDisk(unordered_map<string,lexiconData> &lexicon){
-    string serializedLexicon = "Lexicon";
-    string path = "../inverted_index/";
+
     ofstream out;
-    out.open(path+serializedLexicon);
+    out.open(persistedLexicon);
 
     for(auto i=lexicon.begin();i!=lexicon.end();++i){
         out<<i->first<<" "<<i->second.wordStartOffset<<" "<<i->second.wordEndOffset<<" "

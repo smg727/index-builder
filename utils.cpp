@@ -11,6 +11,7 @@
 #include <unordered_map>
 #include <string>
 #include <sstream>
+#include "flags.h"
 
 using namespace std;
 
@@ -37,16 +38,18 @@ bool compareTuple(Tuple a, Tuple b){
 
 int generatePostings(unordered_map<string,string> &urlMap) {
 
+    // fetch the paths of all wet-files
     vector<string> wetfilePaths = fetchWetFilePaths();
-    string target = "WARC-Target-URI:";
 
+    //for each wet file, generate posting
     for(auto file = wetfilePaths.begin();file!=wetfilePaths.end();++file){
         cout << "generating posting for " << *file << endl;
-        generateFilePosting(*file, urlMap);
-        cout << "complete, current total url's= " << urlMap.size() << endl << endl;
+        int result = generateFilePosting(*file, urlMap);
+        assert(result==0);
+        cout << "posting generaton complete, current total url's= " << urlMap.size() << endl;
     }
 
-//     // used while testing to generate 2 posting files
+     // used while testing to generate 2 posting files
 //    auto file = wetfilePaths.begin();
 //    ++file;
 //    int result = generateFilePosting(*file, urlMap);
@@ -60,10 +63,9 @@ int generatePostings(unordered_map<string,string> &urlMap) {
 // lists out all wet files paths
 vector<string> fetchWetFilePaths() {
     vector<string> fileNames;
-    string path = "../wet_files";
-    DIR* dirp = opendir(path.c_str());
+    DIR* dirp = opendir(wetFilesPath.c_str());
     struct dirent * dp;
-    while ((dp = readdir(dirp)) != NULL) {
+    while ((dp = readdir(dirp)) != nullptr) {
         string fileName(dp->d_name);
         if(fileName.find("warc.wet") != string::npos){
             fileNames.push_back(fileName);
@@ -77,7 +79,6 @@ vector<string> fetchWetFilePaths() {
 // generates posting for a particular wet file
 int generateFilePosting(string fileName, unordered_map<string,string> &urlMap){
     string target = "WARC-Target-URI:";
-    int bufferLength = 9000;
     string filePath = "../wet_files/"+fileName;
     ifstream in;
     in.open(filePath);
@@ -161,10 +162,9 @@ int generateFilePosting(string fileName, unordered_map<string,string> &urlMap){
 }
 
 int writeUrlMapToDisk(unordered_map <string,string> &urlMap){
-    string serializedMap = "UrlMap";
-    string path = "../inverted_index/";
+
     ofstream out;
-    out.open(path+serializedMap);
+    out.open(persistedURLMap);
 
     for(auto i=urlMap.begin();i!=urlMap.end();++i){
         out<<i->first<<" "<<i->second<<endl;
@@ -174,12 +174,11 @@ int writeUrlMapToDisk(unordered_map <string,string> &urlMap){
 }
 
 int loadUrlMapFromDisk(unordered_map <string,string> &urlMap){
-    string serializedMap = "UrlMap";
-    string path = "../inverted_index/";
+
     ifstream in;
     string docID;
     string url;
-    in.open(path+serializedMap);
+    in.open(persistedURLMap);
     while(in >> docID  >> url){
         urlMap.insert(pair<string,string>(docID,url));
     }
