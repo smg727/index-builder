@@ -24,7 +24,7 @@ public:
 
 
 int createInvertedIndex(unordered_map<string,lexiconData> &lexicon){
-    bool writeBinary = true;
+    bool writeBinary = false;
     // sorted postings to read from
     string fileName = "sorted_posting";
     string filePath = "../unix_sorted_postings/"+fileName;
@@ -32,13 +32,18 @@ int createInvertedIndex(unordered_map<string,lexiconData> &lexicon){
     string indexName = "index";
     string indexPath = "../inverted_index/";
     string index_frequency = "index_frequency";
-
     ifstream in;
     in.open(filePath);
     ofstream out;
-    out.open(indexPath+indexName,  ios::binary | ios::out);
     ofstream outFrequency;
-    outFrequency.open(indexPath+index_frequency,  ios::binary | ios::out);
+
+    if(writeBinary){
+        out.open(indexPath+indexName,  ios::binary | ios::out);
+        outFrequency.open(indexPath+index_frequency,  ios::binary | ios::out);
+    } else {
+        out.open(indexPath+indexName);
+        outFrequency.open(indexPath+index_frequency);
+    }
     vector<wordPair> document;
     string prevWord = "0";
     string prevDoc = "0";
@@ -62,14 +67,25 @@ int createInvertedIndex(unordered_map<string,lexiconData> &lexicon){
         int freqStartPosition = outFrequency.tellp();
         //out << prevWord << " ";
         for (auto i = document.begin(); i != document.end(); ++i) {
-            out.write((char *)&i->docID, sizeof(int));
-            outFrequency.write((char *)&i->freq, sizeof(int));
+
+            if(writeBinary){
+                out.write((char *)&i->docID, sizeof(int));
+                outFrequency.write((char *)&i->freq, sizeof(int));
+            }
+            else{
+                out << i->docID << " ";
+                outFrequency << i->freq << " ";
+            }
+        }
+
+        if(!writeBinary){
+            out<<endl;
+            outFrequency<<endl;
         }
         int wordEndPosition = out.tellp();
         int freqEndPosition = outFrequency.tellp();
         lexicon.insert(pair<string,lexiconData>(prevWord,lexiconData(wordStartPosition,
                 wordEndPosition,freqStartPosition,freqEndPosition)));
-//        out << ":\n";
         prevWord = word;
         document.clear();
         document.push_back(wordPair(docID,1));
