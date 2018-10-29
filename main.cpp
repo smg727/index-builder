@@ -18,6 +18,7 @@ string persistedLexicon;
 int main() {
     cout << "Warning: Huge program starting" << std::endl;
 
+    // set up flags and critical variables
     writeBinary = true;
     bufferLength = 9000;
     wetFilesPath = "../wet_files";
@@ -28,49 +29,40 @@ int main() {
     indexFrequencyFile = "../inverted_index/index_frequency";
     persistedLexicon = "../inverted_index/Lexicon";
 
-
+    // set up urlMap and Lexicon
     unordered_map<string,string> urlMap;
     unordered_map<string,lexiconData> lexicon;
 
     int result;
-//    result = generatePostings(urlMap);
-//    assert(result==0);
+    cout << "generating postings" << endl;
+    result = generatePostings(urlMap);
+    assert(result==0);
+    cout << "posting generation complete" << endl;
 
-//    result = writeUrlMapToDisk(urlMap);
-//    assert(result==0);
+    cout<< "writing url map to disk" << endl;
+    result = writeUrlMapToDisk(urlMap);
+    assert(result==0);
+    cout<< "writing url map to disk complete" << endl;
 
-//    result  = loadUrlMapFromDisk(urlMap);
-//    assert(result==0);
-//
-//    result = system(mergeCommand.c_str());
-//    assert(result==0);
+    cout<< "loading url map from disk" << endl;
+    result  = loadUrlMapFromDisk(urlMap);
+    assert(result==0);
+    cout<< "loading url map from disk complete" << endl;
 
+    cout << "merging postings" <<endl;
+    result = system(mergeCommand.c_str());
+    assert(result==0);
+    cout << "merge complete" << endl;
+
+    cout << "creating inverted index" << endl;
     result = createInvertedIndex(lexicon);
     assert(result==0);
+    cout << "index creation complete" << endl;
 
+    cout << "writing lexicon to disk" << endl;
     result = writeLexiconToDisk(lexicon);
     assert(result==0);
-
-
-    // TODO: test
-
-
-//    int x = 123;
-//    ofstream outfile;
-//    outfile.open("junk.dat", ios::binary | ios::out);
-//    outfile.write((char *)&x, sizeof(int)); // sizeof can take a type
-//    x = 256;
-//    outfile.write((char *)&x, sizeof(int));
-//
-//    outfile.close();
-//    int x;
-//    ifstream in;
-//    in.open("junk.dat", ios::binary | ios::in);
-//    in.read((char*)&x, sizeof(x));
-//    cout << x;
-//    in.read((char*)&x, sizeof(x));
-//    cout << x;
-
+    cout << "writing lexicon to disk complete";
 
     return result;
 }

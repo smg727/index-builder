@@ -15,7 +15,7 @@
 
 using namespace std;
 
-// word, docID tuples
+// (word,docID) tuples
 struct Tuple{
 public:
     string word;
@@ -27,7 +27,7 @@ public:
     }
 };
 
-// used to order tuples
+// used to order tuples and sort
 bool compareTuple(Tuple a, Tuple b){
     if(a.word==b.word){
         return a.docID < b.docID;
@@ -41,7 +41,7 @@ int generatePostings(unordered_map<string,string> &urlMap) {
     // fetch the paths of all wet-files
     vector<string> wetfilePaths = fetchWetFilePaths();
 
-    //for each wet file, generate posting
+    // for each wet file, generate postings
     for(auto file = wetfilePaths.begin();file!=wetfilePaths.end();++file){
         cout << "generating posting for " << *file << endl;
         int result = generateFilePosting(*file, urlMap);
@@ -49,14 +49,6 @@ int generatePostings(unordered_map<string,string> &urlMap) {
         cout << "posting generaton complete, current total url's= " << urlMap.size() << endl;
     }
 
-     // used while testing to generate 2 posting files
-//    auto file = wetfilePaths.begin();
-//    ++file;
-//    int result = generateFilePosting(*file, urlMap);
-//    ++file;
-//    result = generateFilePosting(*file, urlMap);
-//    ++file;
-//    result = generateFilePosting(*file, urlMap);
     return 0;
 }
 
@@ -77,6 +69,7 @@ vector<string> fetchWetFilePaths() {
 
 
 // generates posting for a particular wet file
+// this is a custom parser to parse wet files nd generate postings
 int generateFilePosting(string fileName, unordered_map<string,string> &urlMap){
     string target = "WARC-Target-URI:";
     string filePath = "../wet_files/"+fileName;
@@ -161,6 +154,7 @@ int generateFilePosting(string fileName, unordered_map<string,string> &urlMap){
     return 0;
 }
 
+// writes the url map to disk to persist it
 int writeUrlMapToDisk(unordered_map <string,string> &urlMap){
 
     ofstream out;
@@ -173,6 +167,7 @@ int writeUrlMapToDisk(unordered_map <string,string> &urlMap){
     return 0;
 }
 
+// reads persisted urlmap and loads an unordered_map with it
 int loadUrlMapFromDisk(unordered_map <string,string> &urlMap){
 
     ifstream in;

@@ -12,6 +12,8 @@
 
 using namespace std;
 
+// (docID,freq) tuple.
+// This is used to simplify the algorithm to track which docID has what frequency
 struct wordPair{
 public:
     int docID;
@@ -23,13 +25,14 @@ public:
     }
 };
 
-
+// create the inverted index
 int createInvertedIndex(unordered_map<string,lexiconData> &lexicon){
 
     ifstream in;
     in.open(mergedPostings);
     ofstream out;
     ofstream outFrequency;
+    // write binary if the writeBinary flag is true
     if(writeBinary){
         out.open(indexFile,  ios::binary | ios::out);
         outFrequency.open(indexFrequencyFile,  ios::binary | ios::out);
@@ -78,6 +81,7 @@ int createInvertedIndex(unordered_map<string,lexiconData> &lexicon){
         }
         int wordEndPosition = out.tellp();
         int freqEndPosition = outFrequency.tellp();
+        // store byte offsets into lexicon
         lexicon.insert(pair<string,lexiconData>(prevWord,lexiconData(wordStartPosition,
                 wordEndPosition,freqStartPosition,freqEndPosition)));
         prevWord = word;
@@ -90,6 +94,7 @@ int createInvertedIndex(unordered_map<string,lexiconData> &lexicon){
     return 0;
 }
 
+// persists the lexicon by writing it to disk 
 int writeLexiconToDisk(unordered_map<string,lexiconData> &lexicon){
 
     ofstream out;
