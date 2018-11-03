@@ -72,9 +72,8 @@ int main() {
     cout << "finished loading lexicon from disk" <<endl;
 
 //    result = startSearch(lexicon);
-    vector<uint8_t> docList;
-    vector<uint8_t> freqList;
-    result = open("lagoenses",lexicon,docList,freqList);
+    List list;
+    result = open("lagom",lexicon,list);
 
 
 
@@ -86,53 +85,58 @@ int main() {
     // Everything under this is code in test
     // Not an actual part of the codebase
     // Ignore lines below this
-    ofstream output;
-    output.open("out", ios::binary | ios::out);
-    int i = 10;
-    output.write((char *)&i, sizeof(i));
-
-    vector<uint64_t > test;
-    test.push_back(5846);
-    test.push_back(5847);
-    test.push_back(6450);
-    uint8_t out[test.size()*4];
-
-    size_t len =  vbyte_compress_unsorted64(&test[0],&out[0],test.size());
-
-
-
-    size_t start = output.tellp();
-    output.write((char *)&out,len);
-    size_t end = output.tellp();
-    int j = 20;
-    output.write((char *)&j, sizeof(j));
-    output.close();
-    cout << "read from " << start;
-    ifstream input;
-    input.open("out",  ios::binary | ios::in);
-    input.seekg(start);
-    input.read((char *)&out[0],len);
-    input.close();
-
+//    ofstream output;
+//    output.open("out", ios::binary | ios::out);
+//    int i = 10;
+//    output.write((char *)&i, sizeof(i));
+//
+//    vector<uint64_t > test;
+//    test.push_back(1);
+//    test.push_back(3);
+//    test.push_back(5);
+//    test.push_back(7);
+//    test.push_back(9);
+//    test.push_back(100);
+//
+//    uint8_t out[test.size()*4];
+//
+//    size_t len =  vbyte_compress_sorted64(&test[0],&out[0],0,test.size());
+//
+//
+//
+//    size_t start = output.tellp();
+//    output.write((char *)&out,len);
+//    size_t end = output.tellp();
+//    int j = 20;
+//    output.write((char *)&j, sizeof(j));
+//    output.close();
+//    cout << "read from " << start;
+//    ifstream input;
+//    input.open("out",  ios::binary | ios::in);
+//    input.seekg(start);
+//    input.read((char *)&out[0],len);
+//    input.close();
+//
 //    ofstream intOutput;
 //    output.open("intOut", ios::out);
-
-    cout << len << endl;
-    cout << end-start << endl;
-    cout << "ghuge" << endl;
-    vector<uint64_t> outTest;
-    outTest.resize(len*5);
-    size_t newLen = vbyte_uncompress_unsorted64(&out[0], &outTest[0], len);
-    cout << "new len " << newLen << endl;
-
-    for(int i=0;i<outTest.size();i++){
-        cout << outTest[i] << endl;
-    }
+//
+//    cout << len << endl;
+//    cout << end-start << endl;
+//    cout << "ghuge" << endl;
+//    vector<uint64_t> outTest;
+//    outTest.resize(end-start);
+//    size_t newLen = vbyte_uncompress_sorted64(&out[0], &outTest[0], 0,len);
+//    cout << "new len " << newLen << endl;
+//
+//    for(int i=0;i<outTest.size()+3;i++){
+//        cout << outTest[i] << endl;
+//    }
 //    uint64_t sol;
-//    size_t i = vbyte_search_lower_bound_sorted64(&out[0],len,9,1,&sol);
+//    size_t k = vbyte_search_lower_bound_sorted64(&out[0],len,4568419896,0,&sol);
 //    cout <<"lets see"<<endl;
-//    cout << i;
-//    cout << sol;
+//    cout << k << endl;
+//    cout << sol << endl;
+//    cout << (size_t)-1 << endl;
 //    cout << "sangram" << endl;
 
 

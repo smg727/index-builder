@@ -82,8 +82,8 @@ int createInvertedIndex(unordered_map<string,lexiconData> &lexicon){
         //out << prevWord << " ";
         uint8_t compressedDocID[docIDList.size()*4];
         uint8_t compressedFreq[freqList.size()*4];
-        //size_t docLen = vbyte_compress_sorted64(&docIDList[0],&compressedDocID[0],0,docIDList.size());
-        size_t docLen = vbyte_compress_unsorted64(&docIDList[0],&compressedDocID[0],docIDList.size());
+        size_t docLen = vbyte_compress_sorted64(&docIDList[0],&compressedDocID[0],0,docIDList.size());
+        //size_t docLen = vbyte_compress_unsorted64(&docIDList[0],&compressedDocID[0],docIDList.size());
         size_t freqLen = vbyte_compress_unsorted64(&freqList[0],&compressedFreq[0],freqList.size());
 
 

@@ -13,20 +13,23 @@
 using namespace std;
 
 
-int open(string word, unordered_map<string,lexiconData> &lexicon, vector<uint8_t> &docIDList, vector<uint8_t> &freqList){
-
+//int open(string word, unordered_map<string,lexiconData> &lexicon, vector<uint8_t> &docIDList, vector<uint8_t> &freqList,
+//        int *docSize, int *frequencySize){
+int open(string word, unordered_map<string,lexiconData> &lexicon, List list){
     if(lexicon.find(word) == lexicon.end()){
         cout << "word not found";
         return -1;
     }
-    docIDList.clear();
-    freqList.clear();
+    list.docIDList.clear();
+    list.freqList.clear();
     lexiconData wordData =lexicon.at(word);
     int docIDSize = wordData.wordEndOffset-wordData.wordStartOffset;
+    list.docSize = docIDSize;
     int freqSize = wordData.frequencyEndOffset - wordData.frequencyStartOffset;
+    list.frequencySize = freqSize;
     cout<< "reading" << docIDSize << "bytes from " << wordData.wordStartOffset << endl;
-    docIDList.resize(docIDSize);
-    freqList.resize(freqSize);
+    list.docIDList.resize(docIDSize);
+    list.freqList.resize(freqSize);
 
     ifstream freqInput;
     freqInput.open(indexFrequencyFile,  ios::binary | ios::in);
@@ -35,18 +38,19 @@ int open(string word, unordered_map<string,lexiconData> &lexicon, vector<uint8_t
 
     // read data
     docIDInput.seekg(wordData.wordStartOffset);
-    freqInput.read((char *)&freqList[0],freqSize);
-    docIDInput.read((char *)&docIDList[0],docIDSize);
+    freqInput.seekg(wordData.frequencyStartOffset);
+    freqInput.read((char *)&list.freqList[0],freqSize);
+    docIDInput.read((char *)&list.docIDList[0],docIDSize);
 
     freqInput.close();
     docIDInput.close();
 
-    //decompress data
+//    decompress data
     vector<uint64_t> output;
     output.resize(wordData.docCount);
-    cout << docIDList.size() << " doc list size" <<endl;
-//    size_t newLen = vbyte_uncompress_sorted64(&docList[0], &output[0], 0, docList.size());
-    size_t newLen = vbyte_uncompress_unsorted64(&docIDList[0], &output[0], wordData.docCount);
+    cout << list.docIDList.size() << " doc list size" <<endl;
+    size_t newLen = vbyte_uncompress_sorted64(&list.docIDList[0], &output[0], 0, list.docIDList.size());
+    //size_t newLen = vbyte_uncompress_unsorted64(&docIDList[0], &output[0], wordData.docCount);
     cout << "new len " << newLen << endl;
     for(int i=0;i<output.size();i++){
         cout << output[i]<<endl;
@@ -57,22 +61,32 @@ int open(string word, unordered_map<string,lexiconData> &lexicon, vector<uint8_t
     return 0;
 }
 
+
+
+
+
+
+
+
+
+
+
 int startSearch(unordered_map<string,lexiconData> &lexicon){
 
-    // test code
-    vector<uint8_t> docList;
-    vector<uint8_t> freqList;
-    int result = open("lagom",lexicon,docList,freqList);
-
-    uint64_t *output = new uint64_t[docList.size()];
-    cout << docList.size() << "doc list size" <<endl;
-//    size_t newLen = vbyte_uncompress_sorted64(&docList[0], &output[0], 0, docList.size());
-    size_t newLen = vbyte_uncompress_unsorted64(&docList[0], &output[0], docList.size());
-    cout << "new len" << newLen << endl;
-    for(int i=0;i<newLen;i++){
-        cout << output[i]<<endl;
-    }
-
-
-    return 0;
+//    // test code
+//    vector<uint8_t> docList;
+//    vector<uint8_t> freqList;
+//    int result = open("lagom",lexicon,docList,freqList);
+//
+//    uint64_t *output = new uint64_t[docList.size()];
+//    cout << docList.size() << "doc list size" <<endl;
+////    size_t newLen = vbyte_uncompress_sorted64(&docList[0], &output[0], 0, docList.size());
+//    size_t newLen = vbyte_uncompress_unsorted64(&docList[0], &output[0], docList.size());
+//    cout << "new len" << newLen << endl;
+//    for(int i=0;i<newLen;i++){
+//        cout << output[i]<<endl;
+//    }
+//
+//
+//    return 0;
 }
