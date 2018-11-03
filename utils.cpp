@@ -42,12 +42,15 @@ int generatePostings(unordered_map<string,string> &urlMap) {
     vector<string> wetfilePaths = fetchWetFilePaths();
 
     // for each wet file, generate postings
-    for(auto file = wetfilePaths.begin();file!=wetfilePaths.end();++file){
-        cout << "generating posting for " << *file << endl;
-        int result = generateFilePosting(*file, urlMap);
-        assert(result==0);
-        cout << "posting generaton complete, current total url's= " << urlMap.size() << endl;
-    }
+//    for(auto file = wetfilePaths.begin();file!=wetfilePaths.end();++file){
+//        cout << "generating posting for " << *file << endl;
+//        int result = generateFilePosting(*file, urlMap);
+//        assert(result==0);
+//        cout << "posting generaton complete, current total url's= " << urlMap.size() << endl;
+//    }
+
+    auto file = wetfilePaths.begin();
+    int result = generateFilePosting(*file,urlMap);
 
     return 0;
 }

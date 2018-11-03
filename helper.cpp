@@ -9,6 +9,8 @@
 #include <vector>
 #include <sstream>
 #include "flags.h"
+#include <iostream>
+#include "vbyte.h"
 
 using namespace std;
 
@@ -28,6 +30,18 @@ public:
 // create the inverted index
 int createInvertedIndex(unordered_map<string,lexiconData> &lexicon){
 
+    vector<uint64_t> test;
+    test.push_back(1);
+    test.push_back(2);
+    test.push_back(3);
+    test.push_back(4);
+    uint8_t outt[512];
+    size_t len =  vbyte_compress_sorted64(&test[0],&outt[0],1,test.size());
+
+    for(int i=0;i<len;i++){
+        cout << outt[i] << endl;
+    }
+
     ifstream in;
     in.open(mergedPostings);
     ofstream out;
@@ -40,7 +54,9 @@ int createInvertedIndex(unordered_map<string,lexiconData> &lexicon){
         out.open(indexFile);
         outFrequency.open(indexFrequencyFile);
     }
-    vector<wordPair> document;
+//    vector<wordPair> document;
+    vector<uint64_t> docIDList;
+    vector<uint64_t> freqList;
     string prevWord = "0";
     string prevDoc = "0";
     string tok;
@@ -51,8 +67,9 @@ int createInvertedIndex(unordered_map<string,lexiconData> &lexicon){
     while(in >> word  >> docID){
 
         if (word == prevWord) {
-            if (document.empty() || stoi(docID) != document.back().docID) {
-                document.push_back(wordPair(docID,freq));
+            if (docIDList.empty() || stoi(docID) != docIDList.back()) {
+                docIDList.push_back(stoi(docID));
+                freqList.push_back(freq);
                 freq = 1;
             } else {
                 freq++;
@@ -63,30 +80,42 @@ int createInvertedIndex(unordered_map<string,lexiconData> &lexicon){
         int wordStartPosition = out.tellp();
         int freqStartPosition = outFrequency.tellp();
         //out << prevWord << " ";
-        for (auto i = document.begin(); i != document.end(); ++i) {
+        uint8_t compressedDocID[docIDList.size()*4];
+        uint8_t compressedFreq[freqList.size()*4];
+        size_t docLen = vbyte_compress_sorted64(&docIDList[0],&compressedDocID[0],0,docIDList.size());
+        size_t freqLen = vbyte_compress_unsorted64(&freqList[0],&compressedFreq[0],freqList.size());
 
-            if(writeBinary){
-                out.write((char *)&i->docID, sizeof(int));
-                outFrequency.write((char *)&i->freq, sizeof(int));
-            }
-            else{
-                out << i->docID << " ";
-                outFrequency << i->freq << " ";
-            }
-        }
+//        for (auto i = document.begin(); i != document.end(); ++i) {
+//
+//            if(writeBinary){
+//                out.write((char *)&i->docID, sizeof(int));
+//                outFrequency.write((char *)&i->freq, sizeof(int));
+//            }
+//            else{
+//                out << i->docID << " ";
+//                outFrequency << i->freq << " ";
+//            }
+//        }
+          out.write((char *)&compressedDocID,docLen);
+          outFrequency.write((char *)&compressedFreq,freqLen);
 
-        if(!writeBinary){
-            out<<endl;
-            outFrequency<<endl;
-        }
+
+//        if(!writeBinary){
+//            out<<endl;
+//            outFrequency<<endl;
+//        }
         int wordEndPosition = out.tellp();
         int freqEndPosition = outFrequency.tellp();
         // store byte offsets into lexicon
         lexicon.insert(pair<string,lexiconData>(prevWord,lexiconData(wordStartPosition,
                 wordEndPosition,freqStartPosition,freqEndPosition)));
         prevWord = word;
-        document.clear();
-        document.push_back(wordPair(docID,1));
+        docIDList.clear();
+        freqList.clear();
+        docIDList.push_back(0);
+        freqList.push_back(0);
+        docIDList.push_back(stoi(docID));
+        freqList.push_back(1);
     }
 
     in.close();
