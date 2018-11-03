@@ -82,33 +82,20 @@ int createInvertedIndex(unordered_map<string,lexiconData> &lexicon){
         //out << prevWord << " ";
         uint8_t compressedDocID[docIDList.size()*4];
         uint8_t compressedFreq[freqList.size()*4];
-        size_t docLen = vbyte_compress_sorted64(&docIDList[0],&compressedDocID[0],0,docIDList.size());
+        //size_t docLen = vbyte_compress_sorted64(&docIDList[0],&compressedDocID[0],0,docIDList.size());
+        size_t docLen = vbyte_compress_unsorted64(&docIDList[0],&compressedDocID[0],docIDList.size());
         size_t freqLen = vbyte_compress_unsorted64(&freqList[0],&compressedFreq[0],freqList.size());
 
-//        for (auto i = document.begin(); i != document.end(); ++i) {
-//
-//            if(writeBinary){
-//                out.write((char *)&i->docID, sizeof(int));
-//                outFrequency.write((char *)&i->freq, sizeof(int));
-//            }
-//            else{
-//                out << i->docID << " ";
-//                outFrequency << i->freq << " ";
-//            }
-//        }
+
           out.write((char *)&compressedDocID,docLen);
           outFrequency.write((char *)&compressedFreq,freqLen);
 
 
-//        if(!writeBinary){
-//            out<<endl;
-//            outFrequency<<endl;
-//        }
         int wordEndPosition = out.tellp();
         int freqEndPosition = outFrequency.tellp();
         // store byte offsets into lexicon
         lexicon.insert(pair<string,lexiconData>(prevWord,lexiconData(wordStartPosition,
-                wordEndPosition,freqStartPosition,freqEndPosition)));
+                wordEndPosition,freqStartPosition,freqEndPosition,docIDList.size())));
         prevWord = word;
         docIDList.clear();
         freqList.clear();
@@ -131,9 +118,27 @@ int writeLexiconToDisk(unordered_map<string,lexiconData> &lexicon){
 
     for(auto i=lexicon.begin();i!=lexicon.end();++i){
         out<<i->first<<" "<<i->second.wordStartOffset<<" "<<i->second.wordEndOffset<<" "
-        <<i->second.frequencyStartOffset<<" "<<i->second.frequencyEndOffset<<endl;
+        <<i->second.frequencyStartOffset<<" "<<i->second.frequencyEndOffset<<" "<<i->second.docCount<<endl;
     }
     out.close();
     return 0;
 
+}
+
+int readLexiconFromDisk(unordered_map<string,lexiconData> &lexicon){
+
+    ifstream in;
+    in.open(persistedLexicon);
+    string word;
+    string indexStart;
+    string indexEnd;
+    string freqStart;
+    string freqEnd;
+    string docCount;
+    while(in>> word >> indexStart >> indexEnd >> freqStart >> freqEnd >> docCount){
+        lexicon.insert(pair<string,lexiconData>(word,lexiconData(stoi(indexStart),
+                                                                 stoi(indexEnd),stoi(freqStart),stoi(freqEnd),stoi(docCount))));
+
+    }
+    return 0;
 }

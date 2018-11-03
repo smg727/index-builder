@@ -6,7 +6,7 @@
 #define INDEX_BUILDER_HELPER_H
 
 #include <unordered_map>
-#include <string.h>
+#include <string>
 using namespace std;
 
 #endif //INDEX_BUILDER_HELPER_H
@@ -15,16 +15,19 @@ struct lexiconData{
     int wordEndOffset;
     int frequencyStartOffset;
     int frequencyEndOffset;
+    int docCount;
 
-    lexiconData(int wordStartOffset, int wordEndOffset, int frequencyStartOffset, int frequencyEndOffset){
+    lexiconData(int wordStartOffset, int wordEndOffset, int frequencyStartOffset, int frequencyEndOffset , int docCount){
         this->wordStartOffset = wordStartOffset;
         this->wordEndOffset = wordEndOffset;
         this->frequencyStartOffset = frequencyStartOffset;
         this->frequencyEndOffset = frequencyEndOffset;
+        this->docCount = docCount;
 
         return;
     }
 };
 int createInvertedIndex(unordered_map<string,lexiconData> &lexicon);
 int writeLexiconToDisk(unordered_map<string,lexiconData> &lexicon);
+int readLexiconFromDisk(unordered_map<string,lexiconData> &lexicon);
 
