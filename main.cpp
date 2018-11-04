@@ -74,17 +74,27 @@ int main() {
 //    result = startSearch(lexicon);
     List list;
     result = open("lagom",lexicon,&list);
-    int index;
-    result = nextGEQ(&list,0,&index);
-//    if(result!=0){
-//        cout << "nextGEQ not found" << endl;
-//    }
-//    cout << "found " << result << endl;
-//    result = nextGEQ(&list,index+1,&index);
-//    if(result!=0){
-//        cout << "nextGEQ not found" << endl;
-//    }
-//    cout << "found " << result << endl;
+    uint64_t output = 0;
+    uint64_t term = 1;
+    int index = 0;
+    while(index>=0){
+        cout << term << output << index << endl;
+        index = nextGEQ(&list,term,&output);
+        term = output+1;
+    }
+//    index = nextGEQ(&list,term,&output);
+//    cout << index << output <<"term "<< term << endl;
+//    term = output+1;
+//    cout << index << output <<"term "<< term << endl;
+//    index = nextGEQ(&list,term,&output);
+//    cout << index << output << term <<endl;
+//    term = output+1;
+//    index = nextGEQ(&list,term,&output);
+//    cout << index << output << term << endl;
+//    term = output+1;
+//    index = nextGEQ(&list,term,&output);
+//    cout << index << output << term <<  endl;
+//    term = output+1;
 
 
 

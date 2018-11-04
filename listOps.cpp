@@ -45,30 +45,30 @@ int open(string word, unordered_map<string,lexiconData> &lexicon, List *list){
     docIDInput.close();
 
 
-//    decompress data and test
-    vector<uint64_t> output;
-    output.resize(list->docCount);
-    cout << list->docIDList.size() << " doc list size" <<endl;
-    size_t newLen = vbyte_uncompress_sorted64(&list->docIDList[0], &output[0], 0, list->docSize);
-//    size_t newLen = vbyte_uncompress_sorted64(&readTest[0], &output[0],, wordData.docCount);
-    cout << "new len " << newLen << endl;
-    cout << "doc count" << list->docCount << endl;
-    for(int i=0;i<list->docCount;i++){
-        cout << output[i]<<endl;
-    }
-    cout << "complete decompress test" << endl;
-
-    //search test
-    cout << "start search test" << endl;
-    uint64_t sol;
-    int term = 1;
-    int index = 0;
-    while(index<list->docCount){
-        cout << "index: " << index << endl << "result: " << sol << endl;
-        index = vbyte_search_lower_bound_sorted64(&list->docIDList[0],list->docSize,term,0,&sol);
-        term = sol+1;
-    }
-    cout << "end search test " << endl;
+////    decompress data and test
+//    vector<uint64_t> output;
+//    output.resize(list->docCount);
+//    cout << list->docIDList.size() << " doc list size" <<endl;
+//    size_t newLen = vbyte_uncompress_sorted64(&list->docIDList[0], &output[0], 0, list->docSize);
+////    size_t newLen = vbyte_uncompress_sorted64(&readTest[0], &output[0],, wordData.docCount);
+//    cout << "new len " << newLen << endl;
+//    cout << "doc count" << list->docCount << endl;
+//    for(int i=0;i<list->docCount;i++){
+//        cout << output[i]<<endl;
+//    }
+//    cout << "complete decompress test" << endl;
+//
+//    //search test
+//    cout << "start search test" << endl;
+//    uint64_t sol;
+//    int term = 1;
+//    int index = 0;
+//    while(index<list->docCount){
+//        cout << "index: " << index << endl << "result: " << sol << endl;
+//        index = vbyte_search_lower_bound_sorted64(&list->docIDList[0],list->docSize,term,0,&sol);
+//        term = sol+1;
+//    }
+//    cout << "end search test " << endl;
 
 
 
@@ -78,26 +78,27 @@ int open(string word, unordered_map<string,lexiconData> &lexicon, List *list){
 
 // this function return's 0 and the next docID in docID
 // if we reach the end of the list this function will return -1
-int nextGEQ(List *list, uint64_t k, int *docID){
-    vector<uint64_t> output;
-    output.resize(list->docCount);
-    cout << "geq data " << list->docCount;
-    size_t newLen = vbyte_uncompress_sorted64(&list->docIDList[0], &output[0], 0, list->docSize);
-    //size_t newLen = vbyte_uncompress_unsorted64(&docIDList[0], &output[0], wordData.docCount);
-    cout << "new len " << newLen << endl;
-    for(int i=0;i<output.size();i++){
-        cout << output[i]<<endl;
-    }
-    cout << "complete decompress test" << endl;
+int nextGEQ(List *list, uint64_t k, uint64_t *docID){
+//    vector<uint64_t> output;
+//    output.resize(list->docCount);
+//    cout << "geq data " << list->docCount;
+//    size_t newLen = vbyte_uncompress_sorted64(&list->docIDList[0], &output[0], 0, list->docSize);
+//    //size_t newLen = vbyte_uncompress_unsorted64(&docIDList[0], &output[0], wordData.docCount);
+//    cout << "new len " << newLen << endl;
+//    for(int i=0;i<output.size();i++){
+//        cout << output[i]<<endl;
+//    }
+//    cout << "complete decompress test" << endl;
 
-    uint64_t sol;
-    size_t index = vbyte_search_lower_bound_sorted64(&list->docIDList[0],list->docSize,1,0,&sol);
-    cout << index << "  " << sol << endl;
+
+    size_t index = vbyte_search_lower_bound_sorted64(&list->docIDList[0],list->docSize,k,0,docID);
+//    cout << index << "  " << sol << endl;
+//    cout << index << endl;
     if(index>=list->docCount){
-        cout << index << endl;
+
         return -1;
     }
-    return 0;
+    return index;
 }
 
 
