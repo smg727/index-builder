@@ -38,6 +38,7 @@ struct List{
     vector<uint8_t> freqList;
     int docSize;
     int frequencySize;
+    int docCount;
 
 };
 

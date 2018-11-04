@@ -9,7 +9,6 @@
 using namespace std;
 #endif //INDEX_BUILDER_LISTOPS_H
 
-//int open(string word, unordered_map<string,lexiconData> &lexicon, vector<uint8_t> &docIDList, vector<uint8_t> &freqList,
-//        int *docSize, int *frequencySize);
-int open(string word, unordered_map<string,lexiconData> &lexicon, List list);
+int open(string word, unordered_map<string,lexiconData> &lexicon, List *list);
 int startSearch(unordered_map<string,lexiconData> &lexicon);
+int nextGEQ(List *list, uint64_t k, int *docID);

@@ -70,11 +70,21 @@ int main() {
     result = readLexiconFromDisk(lexicon);
     assert(result==0);
     cout << "finished loading lexicon from disk" <<endl;
-
+//
 //    result = startSearch(lexicon);
     List list;
-    result = open("lagom",lexicon,list);
-
+    result = open("lagom",lexicon,&list);
+    int index;
+    result = nextGEQ(&list,0,&index);
+//    if(result!=0){
+//        cout << "nextGEQ not found" << endl;
+//    }
+//    cout << "found " << result << endl;
+//    result = nextGEQ(&list,index+1,&index);
+//    if(result!=0){
+//        cout << "nextGEQ not found" << endl;
+//    }
+//    cout << "found " << result << endl;
 
 
 
@@ -132,12 +142,14 @@ int main() {
 //        cout << outTest[i] << endl;
 //    }
 //    uint64_t sol;
-//    size_t k = vbyte_search_lower_bound_sorted64(&out[0],len,4568419896,0,&sol);
+//    size_t k = vbyte_search_lower_bound_sorted64(&out[0],len,101,0,&sol);
 //    cout <<"lets see"<<endl;
 //    cout << k << endl;
 //    cout << sol << endl;
 //    cout << (size_t)-1 << endl;
 //    cout << "sangram" << endl;
+
+
 
 
 
