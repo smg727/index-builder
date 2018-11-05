@@ -12,3 +12,5 @@ using namespace std;
 int open(string word, unordered_map<string,lexiconData> &lexicon, List *list);
 int startSearch(unordered_map<string,lexiconData> &lexicon);
 int nextGEQ(List *list, uint64_t k, uint64_t *docID);
+int getFreq(List *list, uint64_t docID);
+int close(List *list);

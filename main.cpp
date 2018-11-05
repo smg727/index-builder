@@ -65,46 +65,54 @@ int main() {
 //    result = writeLexiconToDisk(lexicon);
 //    assert(result==0);
 //    cout << "writing lexicon to disk complete";
-//ß
+
     cout << "reading lexicon from disk"<< endl;
     result = readLexiconFromDisk(lexicon);
     assert(result==0);
     cout << "finished loading lexicon from disk" <<endl;
-//
-//    result = startSearch(lexicon);
+
     List list;
     result = open("lagom",lexicon,&list);
-    uint64_t output = 0;
-    uint64_t term = 1;
-    int index = 0;
-    while(index>=0){
-        cout << term << output << index << endl;
-        index = nextGEQ(&list,term,&output);
-        term = output+1;
-    }
-//    index = nextGEQ(&list,term,&output);
-//    cout << index << output <<"term "<< term << endl;
-//    term = output+1;
-//    cout << index << output <<"term "<< term << endl;
-//    index = nextGEQ(&list,term,&output);
-//    cout << index << output << term <<endl;
-//    term = output+1;
-//    index = nextGEQ(&list,term,&output);
-//    cout << index << output << term << endl;
-//    term = output+1;
-//    index = nextGEQ(&list,term,&output);
-//    cout << index << output << term <<  endl;
-//    term = output+1;
 
 
 
 
 
-    cout << "starting custom tests" << endl;
+
+
+
+
+
 
     // Everything under this is code in test
     // Not an actual part of the codebase
     // Ignore lines below this
+
+
+    cout << "starting custom tests" << endl;
+
+//     test function nextGEQ
+    cout << "printing frequencies" << endl;
+    vector<uint64_t> freqOutput;
+    freqOutput.resize(list.docCount);
+    size_t newLen = vbyte_uncompress_unsorted64(&list.freqList[0], &freqOutput[0], list.frequencySize);
+    for(int i=0;i<list.docCount;i++){
+        cout << freqOutput[i]<<endl;
+    }
+
+    uint64_t output = 0;
+    uint64_t term = 1;
+    int frequency =0;
+    int index = 0;
+    while(index>=0){
+        cout << "index " << index << endl;
+        cout << "output " << output << endl;
+        cout << "frequency " << frequency << endl << endl;
+        index = nextGEQ(&list,term,&output);
+        frequency = getFreq(&list, output);
+        term = output+1;
+    }
+
 //    ofstream output;
 //    output.open("out", ios::binary | ios::out);
 //    int i = 10;
@@ -158,8 +166,18 @@ int main() {
 //    cout << sol << endl;
 //    cout << (size_t)-1 << endl;
 //    cout << "sangram" << endl;
+//
+//    cout << "starting select test " << endl;
+//    uint64_t frequency = vbyte_select_sorted64(&out[0],len,0,0);
+//    cout << frequency << endl;
+//    frequency = vbyte_select_sorted64(&out[0],len,0,1);
+//    cout << frequency << endl;
+//    frequency = vbyte_select_sorted64(&out[0],len,0,2);
+//    cout << frequency << endl;
+//    frequency = vbyte_select_sorted64(&out[0],len,0,5);
+//    cout << frequency << endl;
 
-
+    close(&list);
 
 
 

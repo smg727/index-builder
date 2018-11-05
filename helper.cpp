@@ -87,8 +87,8 @@ int createInvertedIndex(unordered_map<string,lexiconData> &lexicon){
         size_t freqLen = vbyte_compress_unsorted64(&freqList[0],&compressedFreq[0],freqList.size());
 
 
-          out.write((char *)&compressedDocID,docLen);
-          outFrequency.write((char *)&compressedFreq,freqLen);
+        out.write((char *)&compressedDocID,docLen);
+        outFrequency.write((char *)&compressedFreq,freqLen);
 
 
         int wordEndPosition = out.tellp();

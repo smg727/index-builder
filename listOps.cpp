@@ -76,8 +76,8 @@ int open(string word, unordered_map<string,lexiconData> &lexicon, List *list){
     return 0;
 }
 
-// this function return's 0 and the next docID in docID
-// if we reach the end of the list this function will return -1
+// this function return's index in the compressed array and next element in docID
+// if we reach the end of the list this function will return -1 and junk
 int nextGEQ(List *list, uint64_t k, uint64_t *docID){
 //    vector<uint64_t> output;
 //    output.resize(list->docCount);
@@ -92,13 +92,33 @@ int nextGEQ(List *list, uint64_t k, uint64_t *docID){
 
 
     size_t index = vbyte_search_lower_bound_sorted64(&list->docIDList[0],list->docSize,k,0,docID);
-//    cout << index << "  " << sol << endl;
-//    cout << index << endl;
     if(index>=list->docCount){
-
+        cout << "reached end of element"<<endl;
         return -1;
     }
     return index;
+}
+
+// finds the frequency for docID
+// returns -1 if docID is not in the list
+int getFreq(List *list, uint64_t docID){
+    uint64_t result;
+    size_t index = vbyte_search_lower_bound_sorted64(&list->docIDList[0],list->docSize,docID,0,&result);
+    if(index>=list->docCount || docID!=result){
+        cout << "docID not in list"<<endl;
+        return -1;
+    }
+    uint64_t frequency = vbyte_select_unsorted64(&list->freqList[0],(size_t)list->frequencySize,index);
+    return frequency;
+
+}
+
+//close list
+int close(List *list){
+    list->freqList.clear();
+    list->docIDList.clear();
+    list = NULL;
+    return 0;
 }
 
 
