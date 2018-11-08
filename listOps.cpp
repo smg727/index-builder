@@ -15,7 +15,7 @@ using namespace std;
 
 int open(string word, unordered_map<string,lexiconData> &lexicon, List *list){
     if(lexicon.find(word) == lexicon.end()){
-        cout << "word not found";
+        cout << "word not found" << endl;
         return -1;
     }
 
@@ -25,7 +25,7 @@ int open(string word, unordered_map<string,lexiconData> &lexicon, List *list){
     list->docSize = wordData.wordEndOffset-wordData.wordStartOffset;
     list->frequencySize = wordData.frequencyEndOffset - wordData.frequencyStartOffset;
     list->docCount = wordData.docCount;
-    cout<< "reading" << list->docSize << "bytes from " << wordData.wordStartOffset << endl;
+    cout<< "reading " << list->docSize << " bytes from " << wordData.wordStartOffset << endl;
     list->docIDList.resize(list->docSize);
     list->freqList.resize(list->frequencySize);
 
@@ -133,20 +133,84 @@ int close(List *list){
 
 int startSearch(unordered_map<string,lexiconData> &lexicon){
 
-//    // test code
-//    vector<uint8_t> docList;
-//    vector<uint8_t> freqList;
-//    int result = open("lagom",lexicon,docList,freqList);
-//
-//    uint64_t *output = new uint64_t[docList.size()];
-//    cout << docList.size() << "doc list size" <<endl;
-////    size_t newLen = vbyte_uncompress_sorted64(&docList[0], &output[0], 0, docList.size());
-//    size_t newLen = vbyte_uncompress_unsorted64(&docList[0], &output[0], docList.size());
-//    cout << "new len" << newLen << endl;
-//    for(int i=0;i<newLen;i++){
-//        cout << output[i]<<endl;
-//    }
-//
-//
-//    return 0;
+    cout << "starting search " << endl;
+    string searchQuery = "lagom lako";
+    // TODO: clean and process query
+    // TODO: remove stop words
+    std::istringstream iss(searchQuery);
+    std::vector<std::string> searchTerms((std::istream_iterator<std::string>(iss)),
+                                     std::istream_iterator<std::string>());
+
+    for(auto it = searchTerms.begin(); it!=searchTerms.end(); ++it ){
+        cout << *it <<endl;
+
+    }
+
+    auto lp = new List[searchTerms.size()];
+    auto geq = new uint64_t[searchTerms.size()];
+
+    // set up lists
+    int listLocation = 0;
+    List list;
+    for(auto it = searchTerms.begin(); it!=searchTerms.end(); ++it){
+        int result = open(*it,lexicon, &list);
+        cout << "loading list for " << *it << endl;
+        if(result!=0){
+            cout << "word " << *it << " does not exist in the lexicon, try another search " << endl;
+            return result;
+        }
+        lp[listLocation] = list;
+        listLocation++;
+    }
+
+    int m_c = 1;
+    uint64_t test;
+    int result = nextGEQ(&lp[0],1,&geq[0]);
+    if(result==-1){
+        cout << "reached end of list for " << searchTerms[0] << endl;
+        return result;
+    }
+    bool eol = false;
+
+
+    while(!eol){
+
+        result = nextGEQ(&lp[m_c],geq[0],&geq[m_c]);
+        if(result==-1){
+            cout << "reached end of list for " << searchTerms[m_c] << endl;
+            eol = true;
+            continue;
+        }
+
+        if(geq[m_c]==geq[0]){
+
+            m_c++;
+            if(m_c==searchTerms.size()){
+                cout << "This document matches the search terms " << geq[0] << endl;
+                // TODO: process this doc
+                result = nextGEQ(&lp[0],geq[0]+1,&geq[0]);
+                if(result==-1){
+                    cout << "reached end of list for " << searchTerms[0] << endl;
+                    eol = true;
+                    continue;
+                }
+                m_c = 1;
+            }
+            continue;
+        }
+
+        result = nextGEQ(&lp[0],geq[m_c],&geq[0]);
+        if(result==-1){
+            cout << "reached end of list for " << searchTerms[0] <<  endl;
+            eol = true;
+            continue;
+        }
+        m_c=1;
+    }
+
+
+
+
+    return result;
+
 }
