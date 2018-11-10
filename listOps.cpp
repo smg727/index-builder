@@ -10,6 +10,7 @@
 #include <iostream>
 #include "vbyte.h"
 
+
 using namespace std;
 
 
@@ -121,20 +122,45 @@ int close(List *list){
     return 0;
 }
 
+float computeBM25(List *lp, vector<string> &searchTerms, uint64_t docID){
+    float bm25 = 0;
+    float k1 = 1.2;
+    float k = 1.2;
+
+    for(int i=0; i<searchTerms.size();++i){
+        int ft = lp[i].docCount;
+        int fDT = getFreq(&lp[i],docID);
+        float firstHalf = log((totalDocCount - ft + 0.5)/(ft+0.5));
+        float secondHalf = ((k1+1)*fDT)/(k+fDT);
+        bm25 = bm25 + firstHalf + secondHalf;
+    }
+    return bm25;
+}
+
+void processHeap(vector<bm25URL> &heap, string url, float bm25Score){
+    if(heap.size()<15){
+        heap.push_back(bm25URL(bm25Score,url));
+        push_heap(heap.begin(),heap.end());
+        return;
+    }
+
+    if(bm25Score<=heap[0].score){
+        return;
+    }
+
+    pop_heap(heap.begin(),heap.end());
+    heap.pop_back();
+    heap.push_back(bm25URL(bm25Score,url));
+    push_heap(heap.begin(),heap.end());
+    return;
+}
 
 
 
-
-
-
-
-
-
-
-int startSearch(unordered_map<string,lexiconData> &lexicon){
+int startSearch(unordered_map<string,lexiconData> &lexicon, unordered_map<string,string> &urlMap){
 
     cout << "starting search " << endl;
-    string searchQuery = "lagom lako";
+    string searchQuery = "elephant dog";
     // TODO: clean and process query
     // TODO: remove stop words
     std::istringstream iss(searchQuery);
@@ -146,8 +172,9 @@ int startSearch(unordered_map<string,lexiconData> &lexicon){
 
     }
 
-    auto lp = new List[searchTerms.size()];
-    auto geq = new uint64_t[searchTerms.size()];
+    List *lp = new List[searchTerms.size()];
+    uint64_t *geq = new uint64_t[searchTerms.size()];
+    vector<bm25URL> heap;
 
     // set up lists
     int listLocation = 0;
@@ -186,8 +213,16 @@ int startSearch(unordered_map<string,lexiconData> &lexicon){
 
             m_c++;
             if(m_c==searchTerms.size()){
-                cout << "This document matches the search terms " << geq[0] << endl;
-                // TODO: process this doc
+//                cout << "This document matches the search terms " << geq[0] << endl;
+                float bm25Score = computeBM25(lp,searchTerms,geq[0]);
+//                cout << "bm25 is " << bm25Score;
+                auto url = urlMap.find(to_string(geq[0]));
+                if(url == urlMap.end()){
+                    cout << "doc id " << geq[0] << " not found in URL map" << endl;
+                } else {
+//                    cout << url->second << endl;
+                    processHeap(heap,url->second,bm25Score);
+                }
                 result = nextGEQ(&lp[0],geq[0]+1,&geq[0]);
                 if(result==-1){
                     cout << "reached end of list for " << searchTerms[0] << endl;
@@ -208,9 +243,19 @@ int startSearch(unordered_map<string,lexiconData> &lexicon){
         m_c=1;
     }
 
+    cout << "Upto top 15 URL's are " << endl;
+    for(int i=0;i<heap.size();++i){
+        cout << i << " " << heap[i].url << " with score " << heap[i].score << endl;
+    }
 
+    // close all lists
+    for(int i=0;i<searchTerms.size();i++){
+        close(&lp[i]);
+    }
 
 
     return result;
 
 }
+
+

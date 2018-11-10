@@ -16,6 +16,7 @@ string mergedPostings;
 string indexFile;
 string indexFrequencyFile;
 string persistedLexicon;
+int totalDocCount;
 
 int main() {
     cout << "Warning: Huge program starting" << std::endl;
@@ -30,12 +31,13 @@ int main() {
     indexFile = "../inverted_index/index";
     indexFrequencyFile = "../inverted_index/index_frequency";
     persistedLexicon = "../inverted_index/Lexicon";
+    totalDocCount = 20000;
 
     // set up urlMap and Lexicon
     unordered_map<string,string> urlMap;
     unordered_map<string,lexiconData> lexicon;
 
-    int result;
+    int result=0;
 //    cout << "generating postings" << endl;
 //    result = generatePostings(urlMap);
 //    assert(result==0);
@@ -46,10 +48,10 @@ int main() {
 //    assert(result==0);
 //    cout<< "writing url map to disk complete" << endl;
 //
-//    cout<< "loading url map from disk" << endl;
-//    result  = loadUrlMapFromDisk(urlMap);
-//    assert(result==0);
-//    cout<< "loading url map from disk complete" << endl;
+    cout<< "loading url map from disk" << endl;
+    result  = loadUrlMapFromDisk(urlMap);
+    assert(result==0);
+    cout<< "loading url map from disk complete" << endl;
 //
 //    cout << "merging postings" <<endl;
 //    result = system(mergeCommand.c_str());
@@ -70,10 +72,10 @@ int main() {
     result = readLexiconFromDisk(lexicon);
     assert(result==0);
     cout << "finished loading lexicon from disk" <<endl;
-
-    List list;
-    result = open("lagom",lexicon,&list);
-    result = startSearch(lexicon);
+//
+////    List list;
+//    //result = open("lagom",lexicon,&list);
+    result = startSearch(lexicon,urlMap);
 
 
 
@@ -183,7 +185,28 @@ int main() {
 //    frequency = vbyte_select_sorted64(&out[0],len,0,5);
 //    cout << frequency << endl;
 
-    close(&list);
+//    close(&list);
+
+    // head  test
+//    vector<bm25URL> test;
+//    bm25URL input = bm25URL(20.1,"lowest");
+//    test.push_back(input);
+//    input = bm25URL(70.2,"highest");
+//    test.push_back(input);
+//    input = bm25URL(30.3,"middle");
+//    test.push_back(input);
+//    make_heap(test.begin(),test.end());
+//
+//    while(test.size()>0){
+//        cout << "peek " << test[0].url <<  " " << test[0].score << endl;
+//        pop_heap(test.begin(),test.end());
+//        bm25URL element = test[test.size()-1];
+//
+//        cout << " heap element " << element.score << " " << element.url << endl;
+//        test.pop_back();
+//    }
+
+
 
 
 

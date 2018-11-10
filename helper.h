@@ -42,3 +42,21 @@ struct List{
 
 };
 
+
+struct bm25URL {
+
+    float score;
+    string url;
+
+    bm25URL(float score,string url){
+        this->score = score;
+        this->url = url;
+    }
+
+    friend bool operator<(const bm25URL& lhs,const bm25URL& rhs){
+        return rhs.score < lhs.score;
+    }
+
+
+};
+

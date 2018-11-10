@@ -17,3 +17,4 @@ extern string mergedPostings;
 extern string indexFile;
 extern string indexFrequencyFile;
 extern string persistedLexicon;
+extern int totalDocCount;
