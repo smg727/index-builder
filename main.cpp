@@ -17,6 +17,7 @@ string indexFile;
 string indexFrequencyFile;
 string persistedLexicon;
 int totalDocCount;
+bool createSnippet;
 
 int main() {
     cout << "Warning: Huge program starting" << std::endl;
@@ -32,6 +33,7 @@ int main() {
     indexFrequencyFile = "../inverted_index/index_frequency";
     persistedLexicon = "../inverted_index/Lexicon";
     totalDocCount = 20000;
+    createSnippet = true;
 
     // set up urlMap and Lexicon
     unordered_map<string,string> urlMap;
@@ -75,7 +77,9 @@ int main() {
 //
 ////    List list;
 //    //result = open("lagom",lexicon,&list);
-    result = startSearch(lexicon,urlMap);
+    while(1) {
+        result = startSearch(lexicon, urlMap);
+    }
 
 
 
@@ -206,7 +210,10 @@ int main() {
 //        test.pop_back();
 //    }
 
-
+//    string url = "www.facebook.com";
+//    const char *test = url.c_str();
+//    string output = getUrlData(test);
+//    cout << output;
 
 
 

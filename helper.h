@@ -31,6 +31,7 @@ struct lexiconData{
 int createInvertedIndex(unordered_map<string,lexiconData> &lexicon);
 int writeLexiconToDisk(unordered_map<string,lexiconData> &lexicon);
 int readLexiconFromDisk(unordered_map<string,lexiconData> &lexicon);
+string getUrlData(const char *url);
 
 struct List{
 

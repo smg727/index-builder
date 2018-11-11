@@ -18,3 +18,4 @@ extern string indexFile;
 extern string indexFrequencyFile;
 extern string persistedLexicon;
 extern int totalDocCount;
+extern bool createSnippet;

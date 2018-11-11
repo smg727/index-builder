@@ -160,18 +160,20 @@ void processHeap(vector<bm25URL> &heap, string url, float bm25Score){
 int startSearch(unordered_map<string,lexiconData> &lexicon, unordered_map<string,string> &urlMap){
 
     cout << "starting search " << endl;
-    string searchQuery = "elephant dog";
+    cout << "Enter your search: " << endl;
+    string searchQuery;
+    getline(cin,searchQuery);
+//    string searchQuery = "elephant dog";
     // TODO: clean and process query
     // TODO: remove stop words
     std::istringstream iss(searchQuery);
     std::vector<std::string> searchTerms((std::istream_iterator<std::string>(iss)),
                                      std::istream_iterator<std::string>());
 
-    for(auto it = searchTerms.begin(); it!=searchTerms.end(); ++it ){
-        cout << *it <<endl;
+    for(auto it = searchTerms.begin(); it!=searchTerms.end(); ++it ) {
+        cout << *it << endl;
 
     }
-
     List *lp = new List[searchTerms.size()];
     uint64_t *geq = new uint64_t[searchTerms.size()];
     vector<bm25URL> heap;
@@ -245,7 +247,28 @@ int startSearch(unordered_map<string,lexiconData> &lexicon, unordered_map<string
 
     cout << "Upto top 15 URL's are " << endl;
     for(int i=0;i<heap.size();++i){
-        cout << i << " " << heap[i].url << " with score " << heap[i].score << endl;
+//        cout << i << " " << heap[i].url << " with score " << heap[i].score << endl;
+        bool snippet = true;
+        vector<string> snippets;
+        string page = getUrlData(heap[i].url.c_str());
+        if(!createSnippet)
+            continue;
+        for(int i=0;i<searchTerms.size();i++){
+            size_t pos = page.find(searchTerms[i]);
+            if(pos == string::npos){
+                snippet = false;
+                break;
+            }
+            snippets.push_back(page.substr(pos-20,60));
+//            cout << "....." << page.substr(pos-20,60) << "...." << endl;
+        }
+        if(snippet){
+            cout << i << " " << heap[i].url << " with score " << heap[i].score << endl << endl;
+            for(auto it = snippets.begin(); it != snippets.end() ; ++it){
+                cout << "...." << *it << "....";
+            }
+        }
+        cout << endl << endl << endl;
     }
 
     // close all lists
@@ -257,5 +280,8 @@ int startSearch(unordered_map<string,lexiconData> &lexicon, unordered_map<string
     return result;
 
 }
+
+
+
 
 

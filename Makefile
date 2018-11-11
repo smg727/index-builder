@@ -3,7 +3,7 @@
 # *****************************************************
 # Variables to control Makefile operation
 CXX = g++
-CXXFLAGS = -Wall -g -std=c++11
+CXXFLAGS = -Wall -g -std=c++11 -lcurl
 
 
 # ****************************************************
