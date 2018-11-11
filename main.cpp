@@ -74,9 +74,9 @@ int main() {
     result = readLexiconFromDisk(lexicon);
     assert(result==0);
     cout << "finished loading lexicon from disk" <<endl;
-//
+
 ////    List list;
-//    //result = open("lagom",lexicon,&list);
+    //result = open("lagom",lexicon,&list);
     while(1) {
         result = startSearch(lexicon, urlMap);
     }

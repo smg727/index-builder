@@ -118,8 +118,8 @@ int writeLexiconToDisk(unordered_map<string,lexiconData> &lexicon){
     out.open(persistedLexicon);
 
     for(auto i=lexicon.begin();i!=lexicon.end();++i){
-        out<<i->first<<" "<<i->second.wordStartOffset<<" "<<i->second.wordEndOffset<<" "
-        <<i->second.frequencyStartOffset<<" "<<i->second.frequencyEndOffset<<" "<<i->second.docCount<<endl;
+        out<<i->first<<" "<<i->second.wordStartOffset<<" "<<i->second.wordEndOffset-i->second.wordStartOffset<<" "
+        <<i->second.frequencyStartOffset<<" "<<i->second.frequencyEndOffset-i->second.frequencyStartOffset<<" "<<i->second.docCount<<endl;
     }
     out.close();
     return 0;
@@ -138,7 +138,7 @@ int readLexiconFromDisk(unordered_map<string,lexiconData> &lexicon){
     string docCount;
     while(in>> word >> indexStart >> indexEnd >> freqStart >> freqEnd >> docCount){
         lexicon.insert(pair<string,lexiconData>(word,lexiconData(stoi(indexStart),
-                                                                 stoi(indexEnd),stoi(freqStart),stoi(freqEnd),stoi(docCount))));
+                                                                 stoi(indexEnd)+stoi(indexStart),stoi(freqStart),stoi(freqEnd)+stoi(freqStart),stoi(docCount))));
 
     }
     return 0;

@@ -267,8 +267,9 @@ int startSearch(unordered_map<string,lexiconData> &lexicon, unordered_map<string
             for(auto it = snippets.begin(); it != snippets.end() ; ++it){
                 cout << "...." << *it << "....";
             }
+            cout << endl << endl << endl;
         }
-        cout << endl << endl << endl;
+
     }
 
     // close all lists
@@ -280,6 +281,11 @@ int startSearch(unordered_map<string,lexiconData> &lexicon, unordered_map<string
     return result;
 
 }
+
+
+
+
+
 
 
 
